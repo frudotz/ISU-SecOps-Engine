@@ -2,6 +2,14 @@
 
 Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir güvenlik analiz aracıdır.
 
+![Rust](https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white)
+![CLI](https://img.shields.io/badge/Tool-CLI-blue)
+![Web](https://img.shields.io/badge/Web-GUI-green)
+![Security](https://img.shields.io/badge/Security-Analyzer-red)
+![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
+![CI](https://github.com/frudotz/ISU-SecOps-Engine/actions/workflows/ci.yml/badge.svg)
+
+
 ---
 
 ## 🚀 Özellikler
@@ -87,6 +95,12 @@ JSON raporlar:
 ```
 assets/reports/
 ```
+
+---
+
+## 📸 Dashboard Preview
+
+![Dashboard](assets/demo/dashboard.png)
 
 ---
 
