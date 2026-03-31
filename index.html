@@ -1,232 +1,433 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Security Scanner</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-  <style>
-    body {
-      font-family: Arial;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 20px;
-    }
+<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    h1 { color: #38bdf8; }
+<title>SecOps Dashboard</title>
 
-    input, select {
-      padding: 10px;
-      border-radius: 6px;
-      border: none;
-      margin-right: 10px;
-    }
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    button {
-      padding: 10px 15px;
-      background: #38bdf8;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
+<style>
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      margin-top: 10px;
-      border-radius: 8px;
-      cursor: pointer;
-    }
+body {
+  margin: 0;
+  font-family: Arial;
+  background: radial-gradient(circle at top,#0f172a,#020617);
+  color: white;
+}
 
-    .secure { color: #22c55e; }
-    .risky { color: #ef4444; }
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
 
-    .details {
-      margin-top: 20px;
-      padding: 15px;
-      background: #1e293b;
-      border-radius: 8px;
-    }
+.logo {
+  font-weight: bold;
+  color: #38bdf8;
+}
 
-    .high { color: #ef4444; }
-    .medium { color: #facc15; }
-    .low { color: #22c55e; }
+.menu {
+  font-size: 22px;
+  cursor: pointer;
+  display: none;
+}
 
-    #loading { margin-top: 10px; }
-  </style>
+/* LAYOUT */
+.container {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 260px;
+  padding: 20px;
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
+  border-right: 1px solid rgba(255,255,255,0.1);
+  overflow-y: auto;
+}
+
+.search {
+  max-width: 240px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  margin-bottom: 15px;
+}
+
+.report {
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.report:hover {
+  background: rgba(56,189,248,0.2);
+}
+
+/* MAIN */
+.main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* GLASS CARD */
+.card {
+  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 0 30px rgba(56,189,248,0.05);
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.full {
+  grid-column: span 2;
+}
+
+/* COLORS */
+.secure { color: #22c55e; }
+.risky { color: #ef4444; }
+
+.high { color: #ef4444; }
+.medium { color: #facc15; }
+.low { color: #22c55e; }
+
+/* INPUT */
+input, button {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+button {
+  background: linear-gradient(45deg,#38bdf8,#6366f1);
+  color: white;
+  cursor: pointer;
+}
+
+/* MOBILE */
+@media(max-width: 900px) {
+
+  .menu { display: block; }
+
+  .sidebar {
+    position: absolute;
+    left: -5in;
+    top: 60px;
+    height: calc(100vh - 60px);
+    transition: 0.3s;
+    z-index: 1;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footer {
+  position: fixed;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+
+  padding: 18px 28px;
+
+  font-size: 12px;
+  color: rgba(255,255,255,0.6);
+
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 16px 16px 0 0;
+
+  white-space: nowrap;
+
+  box-shadow: 0 0 30px rgba(56,189,248,0.1);
+}
+
+/* link style */
+.footer a:not(.name-link) {
+  color: #38bdf8;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  opacity: 0.8;
+}
+
+</style>
+
 </head>
 
 <body>
 
-<h1>HTTP Header Scanner</h1>
+<!-- HEADER -->
+<div class="header">
+  <div class="logo" onclick="reset()" style="cursor: pointer;">SecOps</div>
+  <div class="menu" onclick="toggleMenu()">☰</div>
+</div>
 
-<input id="url" placeholder="example.com">
-<button onclick="scan()">Scan</button>
+<div class="container">
 
-<input id="search" placeholder="Search / severity..." onkeyup="render()">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <input class="search" id="search" placeholder="Ara..." onkeyup="render()">
+    <div id="list"></div>
+  </div>
 
-<select id="filter" onchange="render()">
-  <option value="all">All</option>
-  <option value="A">A</option>
-  <option value="B">B</option>
-  <option value="C">C</option>
-  <option value="F">F</option>
-</select>
+  <!-- MAIN -->
+  <div class="main">
 
-<p id="loading"></p>
+    <!-- SCAN -->
+    <div class="card">
+      <h3>Yeni Tarama</h3>
+      <input id="url" placeholder="example.com">
+      <button onclick="scan()">Tara</button>
+      <p id="loading"></p>
+    </div>
 
-<h3 id="count"></h3>
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="grid"></div>
 
-<div id="list"></div>
-<div id="details" class="details"></div>
-<canvas id="chart"></canvas>
+  </div>
+
+</div>
 
 <script>
 
 let reports = [];
+let selected = null;
 let chart = null;
+
+// MENU
+function toggleMenu() {
+  document.getElementById("sidebar").classList.toggle("active");
+}
 
 // LOAD
 async function load() {
   const res = await fetch('/reports');
   reports = await res.json();
-
-  reports.reverse(); // newest first
-
-  document.getElementById("count").innerText = "Total Reports: " + reports.length;
+  reports.reverse();
 
   render();
+
+  // boş state
+  if(reports.length === 0){
+    document.getElementById("dashboard").innerHTML = `
+      <div class="card full" style="text-align:center;">
+        <h3>Henüz rapor yok</h3>
+        <p>Yeni bir tarama başlatarak başlayabilirsin</p>
+      </div>
+    `;
+  }
+
+  // auto select
+  if(reports.length > 0){
+    show(0);
+  }
 }
 
-// FILTER + SEARCH
+// SIDEBAR
 function render() {
 
-  const search = document.getElementById('search').value.toLowerCase();
-  const filter = document.getElementById('filter').value;
+  const search = document.getElementById("search").value.toLowerCase();
+  const list = document.getElementById("list");
 
-  const list = document.getElementById('list');
   list.innerHTML = "";
 
   reports
-    .filter(r => {
-      if (filter !== "all" && r.grade !== filter) return false;
-
-      if (!r.url.toLowerCase().includes(search) &&
-          !r.headers.some(h => h.severity.toLowerCase().includes(search))) return false;
-
-      return true;
-    })
+    .filter(r => r.url.toLowerCase().includes(search))
     .forEach((r, i) => {
 
-      const div = document.createElement('div');
-      div.className = "card";
+      const div = document.createElement("div");
+      div.className = "report";
 
       div.innerHTML = `
-        <b>${r.url}</b><br>
-        ${r.grade} (${r.score}) -
-        <span class="${r.label === 'Secure' ? 'secure' : 'risky'}">${r.label}</span>
+        ${r.url}<br>
+        <small class="${r.label==='Secure'?'secure':'risky'}">
+        ${r.grade} (${r.score})
+        </small>
       `;
 
-      div.onclick = () => showDetails(i);
+      div.onclick = () => show(i);
+
       list.appendChild(div);
     });
 }
 
-// DETAY
-function showDetails(index) {
+// SHOW
+function show(index) {
+  selected = reports[index];
+  draw();
+}
 
-  const r = reports[index];
+function reset(){
+  selected = null;
+  document.getElementById("dashboard").innerHTML = "";
+}
 
-  let high = 0, medium = 0, low = 0;
-  let critical = "None";
+// DASHBOARD
+function draw() {
 
-  let html = `<h3>${r.url}</h3>
-  <p>${r.grade} (${r.score}) - ${r.label}</p>
-  <hr>`;
+  const r = selected;
+  if (!r) return;
 
-  r.headers.forEach(h => {
+  let high=0, medium=0, low=0;
 
-    if (!h.present && critical === "None") {
-      critical = `${h.name} (${h.severity})`;
+  r.headers.forEach(h=>{
+    if(!h.present){
+      if(h.severity==="HIGH") high++;
+      if(h.severity==="MEDIUM") medium++;
+      if(h.severity==="LOW") low++;
     }
-
-    let sev = h.severity.toLowerCase();
-
-    if (!h.present) {
-      if (sev === "high") high++;
-      if (sev === "medium") medium++;
-      if (sev === "low") low++;
-    }
-
-    html += `
-      <p>
-        ${h.present ? "✅" : "❌"}
-        <b>${h.name}</b>
-        <span class="${sev}">[${h.severity}]</span><br>
-        → ${h.risk}
-      </p>
-    `;
   });
 
-  html += `<p><b>Critical Issue:</b> ${critical}</p>`;
+  const dashboard = document.getElementById("dashboard");
 
-  html += `<p>Checked: ${r.headers.length} | Missing: ${high+medium+low}</p>`;
+  dashboard.innerHTML = `
+  
+  <div class="card">
+    <h3>${r.url}</h3>
+    <p class="${r.label==='Secure'?'secure':'risky'}">
+      ${r.label} (${r.score})
+    </p>
+  </div>
 
-  // score bar
-  html += `
+  <div class="card">
+    <h3>Skor</h3>
     <div style="background:#020617;padding:10px;">
       <div style="width:${r.score}%;background:#38bdf8;height:10px;"></div>
     </div>
+  </div>
+
+  <div class="card">
+    <h3>Özet</h3>
+    HIGH: ${high}<br>
+    MEDIUM: ${medium}<br>
+    LOW: ${low}
+  </div>
+
+  <div class="card">
+    <h3>Kritik</h3>
+    ${r.headers.find(h=>!h.present)?.name || "Yok"}
+  </div>
+
+  <div class="card full">
+    <h3>Header Detayları</h3>
+    ${
+      r.headers.map(h=>`
+        <p>
+          ${h.present?'✅':'❌'}
+          <b>${h.name}</b>
+          <span class="${h.severity.toLowerCase()}">[${h.severity}]</span>
+        </p>
+      `).join('')
+    }
+  </div>
+
+  <div class="card full">
+    <canvas id="chart"></canvas>
+  </div>
   `;
 
-  document.getElementById('details').innerHTML = html;
+  const ctx = document.getElementById("chart");
 
-  // chart
-  const ctx = document.getElementById('chart');
+  if(chart) chart.destroy();
 
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['HIGH','MEDIUM','LOW'],
-      datasets: [{
-        data: [high, medium, low]
-      }]
+  chart = new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['HIGH','MEDIUM','LOW'],
+      datasets:[{data:[high,medium,low]}]
     }
   });
 }
 
-// SCAN
+// SCAN (AUTO SELECT FIX)
 async function scan() {
 
-  const url = document.getElementById('url').value;
-  const loading = document.getElementById('loading');
+  const urlInput = document.getElementById("url");
+  const url = urlInput.value.trim();
+  const loading = document.getElementById("loading");
 
-  if (!url) {
-    loading.innerText = "❌ URL gir";
+  if(!url){
+    loading.innerText="❌ URL girmen gerekiyor";
     return;
   }
 
-  loading.innerText = "⏳ Scanning...";
+  loading.innerText="⏳ Tarama yapılıyor...";
 
   try {
-    await fetch('/scan', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ url })
+
+    const res = await fetch('/scan',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({url})
     });
 
-    loading.innerText = "✅ Done";
-  } catch {
-    loading.innerText = "❌ Error";
-  }
+    if(!res.ok){
+      throw new Error("Sunucu hatası");
+    }
 
-  load();
+    loading.innerText="✅ Tarama tamamlandı";
+
+    // input temizle
+    urlInput.value = "";
+
+    await load();
+
+    // yeni raporu seç
+    show(0);
+
+  } catch (err) {
+
+    console.error(err);
+
+    loading.innerText="❌ Geçersiz URL veya bağlantı hatası";
+
+    // inputu temizle (kullanıcı tekrar yazsın)
+    urlInput.value = "";
+  }
+  setTimeout(()=>{ loading.innerText=""; },3000);
 }
 
 load();
 
 </script>
+
+<div class="footer">
+  Copyright © 2026 • 
+  <a href="https://github.com/frudotz" target="_blank">@frudotz</a>
+</div>
 
 </body>
 </html>
