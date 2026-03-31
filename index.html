@@ -3,6 +3,8 @@
 <head>
   <title>Security Scanner</title>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     body {
       font-family: Arial;
@@ -13,7 +15,7 @@
 
     h1 { color: #38bdf8; }
 
-    input {
+    input, select {
       padding: 10px;
       border-radius: 6px;
       border: none;
@@ -62,6 +64,10 @@
       background: #020617;
       border-radius: 6px;
     }
+
+    #loading {
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -82,6 +88,8 @@
     <option value="C">C</option>
     <option value="F">F</option>
   </select>
+
+  <p id="loading"></p>
 </div>
 
 <h2>Reports</h2>
@@ -89,9 +97,12 @@
 
 <div id="details" class="details"></div>
 
+<canvas id="chart" width="200"></canvas>
+
 <script>
 
 let reports = [];
+let chart = null;
 
 // # LOAD
 async function load() {
@@ -100,7 +111,7 @@ async function load() {
   render();
 }
 
-// # RENDER (FILTER + SEARCH)
+// # FILTER + SEARCH
 function render() {
 
   const search = document.getElementById('search').value.toLowerCase();
@@ -127,12 +138,11 @@ function render() {
       `;
 
       div.onclick = () => showDetails(i);
-
       list.appendChild(div);
     });
 }
 
-// # DETAY
+// # DETAY + GRAFİK
 function showDetails(index) {
 
   const r = reports[index];
@@ -165,7 +175,6 @@ function showDetails(index) {
     `;
   });
 
-  // # TOP SUMMARY
   html += `
     <div class="summary">
       <b>Top Risk Summary:</b><br>
@@ -176,18 +185,48 @@ function showDetails(index) {
   `;
 
   document.getElementById('details').innerHTML = html;
+
+  // # GRAFİK
+  const ctx = document.getElementById('chart');
+
+  if (chart) chart.destroy();
+
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['HIGH', 'MEDIUM', 'LOW'],
+      datasets: [{
+        label: 'Risk Distribution',
+        data: [high, medium, low]
+      }]
+    }
+  });
 }
 
-// # SCAN
+// # SCAN (LOADING + ERROR)
 async function scan() {
 
   const url = document.getElementById('url').value;
+  const loading = document.getElementById('loading');
 
-  await fetch('/scan', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ url })
-  });
+  if (!url) {
+    alert("URL girmen lazım");
+    return;
+  }
+
+  loading.innerText = "⏳ Scanning...";
+
+  try {
+    await fetch('/scan', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ url })
+    });
+
+    loading.innerText = "✅ Done";
+  } catch {
+    loading.innerText = "❌ Hata oluştu";
+  }
 
   load();
 }

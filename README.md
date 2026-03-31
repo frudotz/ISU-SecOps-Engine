@@ -1,6 +1,6 @@
 # HTTP Header Analyzer
 
-Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir araçtır.
+Web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir araçtır.
 
 ---
 
@@ -9,11 +9,13 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web 
 - HTTP header analizi
 - Severity sistemi (HIGH / MEDIUM / LOW)
 - Risk açıklamaları
-- Header value analizi (örn: HSTS kontrolü)
+- Header value analizi (HSTS, CSP, X-Frame, Referrer)
 - Skor ve grade hesaplama
 - JSON rapor çıktısı
 - Batch scan desteği (.txt ile çoklu hedef)
-- Web GUI (tarayıcı üzerinden kullanım)
+- Renkli terminal çıktısı
+- Web GUI (dashboard)
+- Grafik (risk dağılımı)
 - REST API desteği
 
 ---
@@ -23,34 +25,23 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web 
 ### CLI
 
 ```bash
-cargo run -- headers https://example.com
+cargo run -- pentest headers https://example.com
 ````
 
-Batch scan:
+### Batch Scan
 
-```bash id="b44"
-cargo run -- headers targets.txt
+```bash
+cargo run -- pentest headers targets.txt
 ```
 
-JSON çıktıyı kapatmak için:
+### Web GUI
 
-```bash id="c44"
-cargo run -- headers https://example.com --json deny
-```
-
----
-
-### Web Arayüzü
-
-```bash id="d44"
-cargo run -- web
+```bash
+cargo run -- pentest web
 ```
 
 Tarayıcı:
-
-```
-http://127.0.0.1:3000
-```
+[http://127.0.0.1:3000](http://127.0.0.1:3000)
 
 ---
 
@@ -61,6 +52,8 @@ http://127.0.0.1:3000
 * Grade filtreleme
 * Detaylı analiz görüntüleme
 * Risk summary paneli
+* Grafik (HIGH / MEDIUM / LOW dağılımı)
+* Scan sırasında loading feedback
 
 ---
 
@@ -91,26 +84,24 @@ http://127.0.0.1:3000
 
 ## 📁 JSON Raporlar
 
-```
 assets/reports/
-```
 
 ---
 
 ## 🧪 Test
 
 ```bash
-cargo test
+cargo test -p pentester
 ```
 
 ---
 
 ## 🧾 Versiyon
 
-v0.4.4
+v0.4.6
 
 ---
 
 ## 📝 Not
 
-Bu araç temel header analizi yapar. Gelişmiş pentest işlemleri içermez.
+Bu araç temel HTTP header analizi yapar, ileri seviye pentest içermez.
