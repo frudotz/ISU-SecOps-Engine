@@ -1,6 +1,6 @@
 # HTTP Header Analyzer
 
-Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden ve sonuçları hem CLI hem de Web GUI üzerinden sunan bir araçtır.
+Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir araçtır.
 
 ---
 
@@ -9,8 +9,10 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden ve sonuçlar
 - HTTP header analizi
 - Severity sistemi (HIGH / MEDIUM / LOW)
 - Risk açıklamaları
+- Header value analizi (örn: HSTS kontrolü)
 - Skor ve grade hesaplama
 - JSON rapor çıktısı
+- Batch scan desteği (.txt ile çoklu hedef)
 - Web GUI (tarayıcı üzerinden kullanım)
 - REST API desteği
 
@@ -24,9 +26,15 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden ve sonuçlar
 cargo run -- headers https://example.com
 ````
 
+Batch scan:
+
+```bash id="b44"
+cargo run -- headers targets.txt
+```
+
 JSON çıktıyı kapatmak için:
 
-```bash
+```bash id="c44"
 cargo run -- headers https://example.com --json deny
 ```
 
@@ -34,15 +42,25 @@ cargo run -- headers https://example.com --json deny
 
 ### Web Arayüzü
 
-```bash
+```bash id="d44"
 cargo run -- web
 ```
 
-Tarayıcıdan aç:
+Tarayıcı:
 
-```text
+```
 http://127.0.0.1:3000
 ```
+
+---
+
+## 🌐 Web GUI Özellikleri
+
+* Rapor listeleme
+* Arama (search)
+* Grade filtreleme
+* Detaylı analiz görüntüleme
+* Risk summary paneli
 
 ---
 
@@ -51,8 +69,8 @@ http://127.0.0.1:3000
 1. URL alınır
 2. HTTP isteği gönderilir
 3. Header'lar analiz edilir
-4. Eksik header'lar için risk hesaplanır
-5. Severity bazlı skor düşürülür
+4. Severity ve risk belirlenir
+5. Skor hesaplanır
 6. Sonuçlar:
 
    * Terminal
@@ -73,7 +91,7 @@ http://127.0.0.1:3000
 
 ## 📁 JSON Raporlar
 
-```text
+```
 assets/reports/
 ```
 
@@ -89,10 +107,10 @@ cargo test
 
 ## 🧾 Versiyon
 
-v0.4.0
+v0.4.4
 
 ---
 
 ## 📝 Not
 
-Bu araç temel header analizi yapar. Gelişmiş güvenlik testleri içermez.
+Bu araç temel header analizi yapar. Gelişmiş pentest işlemleri içermez.
