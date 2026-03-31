@@ -2,7 +2,6 @@
 <html>
 <head>
   <title>Security Scanner</title>
-
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
@@ -30,10 +29,6 @@
       cursor: pointer;
     }
 
-    .topbar {
-      margin-bottom: 20px;
-    }
-
     .card {
       background: #1e293b;
       padding: 15px;
@@ -42,10 +37,8 @@
       cursor: pointer;
     }
 
-    .grade-A { color: #22c55e; }
-    .grade-B { color: #84cc16; }
-    .grade-C { color: #facc15; }
-    .grade-F { color: #ef4444; }
+    .secure { color: #22c55e; }
+    .risky { color: #ef4444; }
 
     .details {
       margin-top: 20px;
@@ -58,16 +51,7 @@
     .medium { color: #facc15; }
     .low { color: #22c55e; }
 
-    .summary {
-      margin-top: 10px;
-      padding: 10px;
-      background: #020617;
-      border-radius: 6px;
-    }
-
-    #loading {
-      margin-top: 10px;
-    }
+    #loading { margin-top: 10px; }
   </style>
 </head>
 
@@ -75,43 +59,45 @@
 
 <h1>HTTP Header Scanner</h1>
 
-<div class="topbar">
-  <input id="url" placeholder="example.com">
-  <button onclick="scan()">Scan</button>
+<input id="url" placeholder="example.com">
+<button onclick="scan()">Scan</button>
 
-  <input id="search" placeholder="Search..." onkeyup="render()">
+<input id="search" placeholder="Search / severity..." onkeyup="render()">
 
-  <select id="filter" onchange="render()">
-    <option value="all">All</option>
-    <option value="A">A</option>
-    <option value="B">B</option>
-    <option value="C">C</option>
-    <option value="F">F</option>
-  </select>
+<select id="filter" onchange="render()">
+  <option value="all">All</option>
+  <option value="A">A</option>
+  <option value="B">B</option>
+  <option value="C">C</option>
+  <option value="F">F</option>
+</select>
 
-  <p id="loading"></p>
-</div>
+<p id="loading"></p>
 
-<h2>Reports</h2>
+<h3 id="count"></h3>
+
 <div id="list"></div>
-
 <div id="details" class="details"></div>
-
-<canvas id="chart" width="200"></canvas>
+<canvas id="chart"></canvas>
 
 <script>
 
 let reports = [];
 let chart = null;
 
-// # LOAD
+// LOAD
 async function load() {
   const res = await fetch('/reports');
   reports = await res.json();
+
+  reports.reverse(); // newest first
+
+  document.getElementById("count").innerText = "Total Reports: " + reports.length;
+
   render();
 }
 
-// # FILTER + SEARCH
+// FILTER + SEARCH
 function render() {
 
   const search = document.getElementById('search').value.toLowerCase();
@@ -123,7 +109,10 @@ function render() {
   reports
     .filter(r => {
       if (filter !== "all" && r.grade !== filter) return false;
-      if (!r.url.toLowerCase().includes(search)) return false;
+
+      if (!r.url.toLowerCase().includes(search) &&
+          !r.headers.some(h => h.severity.toLowerCase().includes(search))) return false;
+
       return true;
     })
     .forEach((r, i) => {
@@ -133,8 +122,8 @@ function render() {
 
       div.innerHTML = `
         <b>${r.url}</b><br>
-        Grade: <span class="grade-${r.grade}">${r.grade}</span>
-        (${r.score})
+        ${r.grade} (${r.score}) -
+        <span class="${r.label === 'Secure' ? 'secure' : 'risky'}">${r.label}</span>
       `;
 
       div.onclick = () => showDetails(i);
@@ -142,20 +131,23 @@ function render() {
     });
 }
 
-// # DETAY + GRAFİK
+// DETAY
 function showDetails(index) {
 
   const r = reports[index];
 
   let high = 0, medium = 0, low = 0;
+  let critical = "None";
 
-  let html = `
-    <h3>${r.url}</h3>
-    <p>Grade: <b class="grade-${r.grade}">${r.grade}</b> (${r.score})</p>
-    <hr>
-  `;
+  let html = `<h3>${r.url}</h3>
+  <p>${r.grade} (${r.score}) - ${r.label}</p>
+  <hr>`;
 
   r.headers.forEach(h => {
+
+    if (!h.present && critical === "None") {
+      critical = `${h.name} (${h.severity})`;
+    }
 
     let sev = h.severity.toLowerCase();
 
@@ -175,18 +167,20 @@ function showDetails(index) {
     `;
   });
 
+  html += `<p><b>Critical Issue:</b> ${critical}</p>`;
+
+  html += `<p>Checked: ${r.headers.length} | Missing: ${high+medium+low}</p>`;
+
+  // score bar
   html += `
-    <div class="summary">
-      <b>Top Risk Summary:</b><br>
-      HIGH: ${high} <br>
-      MEDIUM: ${medium} <br>
-      LOW: ${low}
+    <div style="background:#020617;padding:10px;">
+      <div style="width:${r.score}%;background:#38bdf8;height:10px;"></div>
     </div>
   `;
 
   document.getElementById('details').innerHTML = html;
 
-  // # GRAFİK
+  // chart
   const ctx = document.getElementById('chart');
 
   if (chart) chart.destroy();
@@ -194,23 +188,22 @@ function showDetails(index) {
   chart = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['HIGH', 'MEDIUM', 'LOW'],
+      labels: ['HIGH','MEDIUM','LOW'],
       datasets: [{
-        label: 'Risk Distribution',
         data: [high, medium, low]
       }]
     }
   });
 }
 
-// # SCAN (LOADING + ERROR)
+// SCAN
 async function scan() {
 
   const url = document.getElementById('url').value;
   const loading = document.getElementById('loading');
 
   if (!url) {
-    alert("URL girmen lazım");
+    loading.innerText = "❌ URL gir";
     return;
   }
 
@@ -225,13 +218,12 @@ async function scan() {
 
     loading.innerText = "✅ Done";
   } catch {
-    loading.innerText = "❌ Hata oluştu";
+    loading.innerText = "❌ Error";
   }
 
   load();
 }
 
-// # INIT
 load();
 
 </script>

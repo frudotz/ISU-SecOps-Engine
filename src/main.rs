@@ -38,6 +38,7 @@ struct report {
     url: String,
     grade: String,
     score: i32,
+    label: String,
     headers: Vec<headerResult> }
 
 // # MAIN
@@ -186,16 +187,19 @@ async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>>
         _ => "F"
     };
 
+    let label = if score >= 75 { "Secure" } else { "Risky" };
+
     println!("\nTop Issues:");
     for (sev, name) in issues.iter().take(3) {
         println!("- [{}] {}", sev, name);
     }
 
     Ok(report {
-        url: fixedUrl,
-        grade: grade.to_string(),
-        score,
-        headers: results
+    url: fixedUrl,
+    grade: grade.to_string(),
+    score,
+    label: label.to_string(),
+    headers: results
     })
 }
 
