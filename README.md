@@ -8,7 +8,8 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web 
 ![Security](https://img.shields.io/badge/Security-Analyzer-red)
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![CI](https://github.com/frudotz/ISU-SecOps-Engine/actions/workflows/ci.yml/badge.svg)
-
+![License](https://img.shields.io/github/license/frudotz/ISU-SecOps-Engine)
+![Last Commit](https://img.shields.io/github/last-commit/frudotz/ISU-SecOps-Engine)
 
 ---
 
