@@ -25,19 +25,19 @@ Web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzeri
 ### CLI
 
 ```bash
-cargo run -- pentest headers https://example.com
+cargo run -- headers https://example.com
 ````
 
 ### Batch Scan
 
 ```bash
-cargo run -- pentest headers targets.txt
+cargo run -- headers targets.txt
 ```
 
 ### Web GUI
 
 ```bash
-cargo run -- pentest web
+cargo run -- web
 ```
 
 Tarayıcı:
@@ -91,7 +91,7 @@ assets/reports/
 ## 🧪 Test
 
 ```bash
-cargo test -p pentester
+cargo test
 ```
 
 ---
