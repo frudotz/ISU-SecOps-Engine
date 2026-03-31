@@ -5,12 +5,41 @@ Bu proje, verilen bir web sitesinin HTTP güvenlik headerlarını analiz eden bi
 ## Kullanım
 
 ```bash
-cargo run -- headers https://frudotz.com
+cargo run -- headers https://example.com
 ````
+
+## Özellikler
+
+* HTTP header analizi
+* Markdown çıktı
+* JSON rapor oluşturma (varsayılan açık)
+* Basit güvenlik skorlama sistemi
+
+## JSON Çıktı
+
+Araç varsayılan olarak analiz sonuçlarını JSON formatında kaydeder:
+
+```bash
+cargo run -- headers https://example.com
+```
+
+JSON çıktıyı kapatmak için:
+
+```bash
+cargo run -- headers https://example.com --json deny
+```
+
+JSON dosyaları:
+
+```id="4n4smr"
+assets/reports/
+```
+
+klasörüne kaydedilir.
 
 ## Örnek Çıktı
 
-```
+```id="ncz6pn"
 # Security Report
 
 Target: https://frudotz.com
@@ -26,15 +55,8 @@ Grade: F
 
 ## Açıklama
 
-Analiz sonucuna göre hedef web sitesinde temel güvenlik headerlarının eksik olduğu tespit edilmiştir. Bu durum, uygulamanın çeşitli web tabanlı saldırılara karşı daha savunmasız olabileceğini göstermektedir.
-
-## Özellikler
-
-* HTTP header analizi
-* CLI üzerinden kullanım
-* Markdown ve JSON çıktı desteği
-* Basit güvenlik skorlama sistemi
+Analiz sonucuna göre hedef web sitesinde temel güvenlik headerlarının eksik olduğu tespit edilmiştir. Bu durum, sistemin çeşitli web saldırılarına karşı daha savunmasız olabileceğini göstermektedir.
 
 ## Version
 
-Current version: v0.1.0
+Current version: v0.2.0
