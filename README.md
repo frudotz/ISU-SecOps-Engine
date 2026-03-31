@@ -1,27 +1,27 @@
 # HTTP Header Analyzer
 
-Bu proje, verilen bir web sitesinin HTTP güvenlik headerlarını analiz eden bir CLI aracıdır.
+Bu proje, verilen bir web sitesinin HTTP güvenlik headerlarını analiz eden CLI tabanlı bir araçtır.
 
-## Kullanım
+Sistem yalnızca header varlığını kontrol etmekle kalmaz, aynı zamanda eksik yapılandırmalar için olası güvenlik risklerini değerlendirir ve bir skor üretir.
+
+---
+
+## 🚀 Özellikler
+
+- HTTP güvenlik header analizi
+- Severity (HIGH / MEDIUM / LOW) sistemi
+- Risk açıklamaları (örn: XSS, MITM, Clickjacking)
+- Ağırlıklı skor ve grade hesaplama
+- Markdown terminal çıktısı
+- JSON rapor oluşturma (varsayılan açık)
+
+---
+
+## ⚙️ Kullanım
 
 ```bash
 cargo run -- headers https://example.com
 ````
-
-## Özellikler
-
-* HTTP header analizi
-* Markdown çıktı
-* JSON rapor oluşturma (varsayılan açık)
-* Basit güvenlik skorlama sistemi
-
-## JSON Çıktı
-
-Araç varsayılan olarak analiz sonuçlarını JSON formatında kaydeder:
-
-```bash
-cargo run -- headers https://example.com
-```
 
 JSON çıktıyı kapatmak için:
 
@@ -29,34 +29,96 @@ JSON çıktıyı kapatmak için:
 cargo run -- headers https://example.com --json deny
 ```
 
-JSON dosyaları:
+---
 
-```id="4n4smr"
-assets/reports/
-```
+## 📊 Örnek Çıktı
 
-klasörüne kaydedilir.
-
-## Örnek Çıktı
-
-```id="ncz6pn"
+```id="ornekcikti"
 # Security Report
 
 Target: https://frudotz.com
-Grade: F
+Grade: F (Score: 20)
 
-- strict-transport-security: ❌ Missing
-- content-security-policy: ❌ Missing
-- x-frame-options: ❌ Missing
-- x-content-type-options: ❌ Missing
-- referrer-policy: ❌ Missing
-- permissions-policy: ❌ Missing
+- ❌ content-security-policy [HIGH]
+  → XSS saldırılarına açık olabilir
+
+- ❌ strict-transport-security [HIGH]
+  → MITM saldırılarına açık olabilir
+
+- ❌ x-frame-options [MEDIUM]
+  → Clickjacking saldırılarına açık olabilir
 ```
 
-## Açıklama
+---
 
-Analiz sonucuna göre hedef web sitesinde temel güvenlik headerlarının eksik olduğu tespit edilmiştir. Bu durum, sistemin çeşitli web saldırılarına karşı daha savunmasız olabileceğini göstermektedir.
+## 🧠 Nasıl Çalışır?
 
-## Version
+1. Hedef URL’e HTTP isteği gönderilir
+2. Response header’ları alınır
+3. Tanımlı güvenlik header listesi ile karşılaştırılır
+4. Her header için:
 
-Current version: v0.2.0
+   * Var/yok kontrolü yapılır
+   * Severity atanır
+   * Eksikse risk açıklaması eklenir
+5. Genel skor hesaplanır
+6. Sonuçlar terminalde ve JSON olarak sunulur
+
+---
+
+## 📁 JSON Çıktı
+
+Raporlar aşağıdaki klasöre kaydedilir:
+
+```
+assets/reports/
+```
+
+---
+
+## 🧮 Skorlama Sistemi
+
+Başlangıç puanı: **100**
+
+Eksik header’lara göre düşüş:
+
+| Severity | Puan |
+| -------- | ---- |
+| HIGH     | -20  |
+| MEDIUM   | -10  |
+| LOW      | -5   |
+
+### Grade
+
+| Skor   | Not |
+| ------ | --- |
+| 90-100 | A   |
+| 75-89  | B   |
+| 50-74  | C   |
+| <50    | F   |
+
+---
+
+## 🧪 Test
+
+```bash
+cargo test
+```
+
+---
+
+## 🧾 Versiyon
+
+**Current version:** v0.3.0
+
+---
+
+## 📝 Not
+
+Bu araç yalnızca header varlığını kontrol eder ve basit risk yorumları üretir. Header içeriklerinin doğruluğu veya tam güvenlik analizi yapılmamaktadır.
+
+---
+
+## 🎯 Amaç
+
+Bu proje, temel web güvenliği prensiplerini anlamak ve Rust ile CLI tabanlı bir analiz aracı geliştirmek amacıyla hazırlanmıştır.
