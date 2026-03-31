@@ -7,14 +7,16 @@
 [Ne yaptığınızı kısaca açıklayın]
 
 ### Kullanım
-\```bash
+```bash
 cargo run -- pentest [komut] [hedef] [parametreler]
-\```
+````
 
 ### Test
-\```bash
+
+```bash
 cargo test -p pentester
-\```
+```
 
 ### Öğrendiklerim
+
 [Bu modülü yaparken ne öğrendiniz?]
