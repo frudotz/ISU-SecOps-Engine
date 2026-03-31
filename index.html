@@ -15,18 +15,21 @@
 
     input {
       padding: 10px;
-      width: 300px;
       border-radius: 6px;
       border: none;
+      margin-right: 10px;
     }
 
     button {
       padding: 10px 15px;
-      margin-left: 10px;
       background: #38bdf8;
       border: none;
       border-radius: 6px;
       cursor: pointer;
+    }
+
+    .topbar {
+      margin-bottom: 20px;
     }
 
     .card {
@@ -52,6 +55,13 @@
     .high { color: #ef4444; }
     .medium { color: #facc15; }
     .low { color: #22c55e; }
+
+    .summary {
+      margin-top: 10px;
+      padding: 10px;
+      background: #020617;
+      border-radius: 6px;
+    }
   </style>
 </head>
 
@@ -59,8 +69,20 @@
 
 <h1>HTTP Header Scanner</h1>
 
-<input id="url" placeholder="https://example.com">
-<button onclick="scan()">Scan</button>
+<div class="topbar">
+  <input id="url" placeholder="example.com">
+  <button onclick="scan()">Scan</button>
+
+  <input id="search" placeholder="Search..." onkeyup="render()">
+
+  <select id="filter" onchange="render()">
+    <option value="all">All</option>
+    <option value="A">A</option>
+    <option value="B">B</option>
+    <option value="C">C</option>
+    <option value="F">F</option>
+  </select>
+</div>
 
 <h2>Reports</h2>
 <div id="list"></div>
@@ -71,33 +93,51 @@
 
 let reports = [];
 
-// # REPORTLARI ÇEK
+// # LOAD
 async function load() {
   const res = await fetch('/reports');
   reports = await res.json();
+  render();
+}
+
+// # RENDER (FILTER + SEARCH)
+function render() {
+
+  const search = document.getElementById('search').value.toLowerCase();
+  const filter = document.getElementById('filter').value;
 
   const list = document.getElementById('list');
   list.innerHTML = "";
 
-  reports.forEach((r, index) => {
-    const div = document.createElement('div');
+  reports
+    .filter(r => {
+      if (filter !== "all" && r.grade !== filter) return false;
+      if (!r.url.toLowerCase().includes(search)) return false;
+      return true;
+    })
+    .forEach((r, i) => {
 
-    div.className = "card";
-    div.innerHTML = `
-      <b>${r.url}</b><br>
-      Grade: <span class="grade-${r.grade}">${r.grade}</span> 
-      (Score: ${r.score})
-    `;
+      const div = document.createElement('div');
+      div.className = "card";
 
-    div.onclick = () => showDetails(index);
+      div.innerHTML = `
+        <b>${r.url}</b><br>
+        Grade: <span class="grade-${r.grade}">${r.grade}</span>
+        (${r.score})
+      `;
 
-    list.appendChild(div);
-  });
+      div.onclick = () => showDetails(i);
+
+      list.appendChild(div);
+    });
 }
 
-// # DETAY GÖSTER
+// # DETAY
 function showDetails(index) {
+
   const r = reports[index];
+
+  let high = 0, medium = 0, low = 0;
 
   let html = `
     <h3>${r.url}</h3>
@@ -106,23 +146,41 @@ function showDetails(index) {
   `;
 
   r.headers.forEach(h => {
-    let sevClass = h.severity.toLowerCase();
+
+    let sev = h.severity.toLowerCase();
+
+    if (!h.present) {
+      if (sev === "high") high++;
+      if (sev === "medium") medium++;
+      if (sev === "low") low++;
+    }
 
     html += `
       <p>
-        ${h.present ? "✅" : "❌"} 
-        <b>${h.name}</b> 
-        <span class="${sevClass}">[${h.severity}]</span><br>
+        ${h.present ? "✅" : "❌"}
+        <b>${h.name}</b>
+        <span class="${sev}">[${h.severity}]</span><br>
         → ${h.risk}
       </p>
     `;
   });
+
+  // # TOP SUMMARY
+  html += `
+    <div class="summary">
+      <b>Top Risk Summary:</b><br>
+      HIGH: ${high} <br>
+      MEDIUM: ${medium} <br>
+      LOW: ${low}
+    </div>
+  `;
 
   document.getElementById('details').innerHTML = html;
 }
 
 // # SCAN
 async function scan() {
+
   const url = document.getElementById('url').value;
 
   await fetch('/scan', {
