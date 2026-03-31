@@ -15,12 +15,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Build
         run: cargo build --verbose
@@ -36,12 +34,10 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Setup Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
 
       - name: Build
         run: cargo build --verbose
@@ -60,24 +56,20 @@ jobs:
       image: kalilinux/kali-rolling
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install Dependencies
         run: |
           apt update
-          apt install -y curl build-essential
+          apt install -y curl build-essential pkg-config libssl-dev ca-certificates
 
       - name: Install Rust
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
-          source $HOME/.cargo/env
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
       - name: Build
-        run: |
-          source $HOME/.cargo/env
-          cargo build
+        run: cargo build --verbose
 
       - name: Test
-        run: |
-          source $HOME/.cargo/env
-          cargo test
+        run: cargo test --all
