@@ -1,23 +1,24 @@
 # HTTP Header Analyzer
 
-Bu proje, verilen bir web sitesinin HTTP güvenlik headerlarını analiz eden CLI tabanlı bir araçtır.
-
-Sistem yalnızca header varlığını kontrol etmekle kalmaz, aynı zamanda eksik yapılandırmalar için olası güvenlik risklerini değerlendirir ve bir skor üretir.
+Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden ve sonuçları hem CLI hem de Web GUI üzerinden sunan bir araçtır.
 
 ---
 
 ## 🚀 Özellikler
 
-- HTTP güvenlik header analizi
-- Severity (HIGH / MEDIUM / LOW) sistemi
-- Risk açıklamaları (örn: XSS, MITM, Clickjacking)
-- Ağırlıklı skor ve grade hesaplama
-- Markdown terminal çıktısı
-- JSON rapor oluşturma (varsayılan açık)
+- HTTP header analizi
+- Severity sistemi (HIGH / MEDIUM / LOW)
+- Risk açıklamaları
+- Skor ve grade hesaplama
+- JSON rapor çıktısı
+- Web GUI (tarayıcı üzerinden kullanım)
+- REST API desteği
 
 ---
 
 ## ⚙️ Kullanım
+
+### CLI
 
 ```bash
 cargo run -- headers https://example.com
@@ -31,56 +32,36 @@ cargo run -- headers https://example.com --json deny
 
 ---
 
-## 📊 Örnek Çıktı
+### Web Arayüzü
 
-```id="ornekcikti"
-# Security Report
+```bash
+cargo run -- web
+```
 
-Target: https://frudotz.com
-Grade: F (Score: 20)
+Tarayıcıdan aç:
 
-- ❌ content-security-policy [HIGH]
-  → XSS saldırılarına açık olabilir
-
-- ❌ strict-transport-security [HIGH]
-  → MITM saldırılarına açık olabilir
-
-- ❌ x-frame-options [MEDIUM]
-  → Clickjacking saldırılarına açık olabilir
+```text
+http://127.0.0.1:3000
 ```
 
 ---
 
-## 🧠 Nasıl Çalışır?
+## 📊 Sistem Nasıl Çalışır?
 
-1. Hedef URL’e HTTP isteği gönderilir
-2. Response header’ları alınır
-3. Tanımlı güvenlik header listesi ile karşılaştırılır
-4. Her header için:
+1. URL alınır
+2. HTTP isteği gönderilir
+3. Header'lar analiz edilir
+4. Eksik header'lar için risk hesaplanır
+5. Severity bazlı skor düşürülür
+6. Sonuçlar:
 
-   * Var/yok kontrolü yapılır
-   * Severity atanır
-   * Eksikse risk açıklaması eklenir
-5. Genel skor hesaplanır
-6. Sonuçlar terminalde ve JSON olarak sunulur
-
----
-
-## 📁 JSON Çıktı
-
-Raporlar aşağıdaki klasöre kaydedilir:
-
-```
-assets/reports/
-```
+   * Terminal
+   * JSON
+   * Web GUI
 
 ---
 
-## 🧮 Skorlama Sistemi
-
-Başlangıç puanı: **100**
-
-Eksik header’lara göre düşüş:
+## 🧮 Skorlama
 
 | Severity | Puan |
 | -------- | ---- |
@@ -88,14 +69,13 @@ Eksik header’lara göre düşüş:
 | MEDIUM   | -10  |
 | LOW      | -5   |
 
-### Grade
+---
 
-| Skor   | Not |
-| ------ | --- |
-| 90-100 | A   |
-| 75-89  | B   |
-| 50-74  | C   |
-| <50    | F   |
+## 📁 JSON Raporlar
+
+```text
+assets/reports/
+```
 
 ---
 
@@ -109,16 +89,10 @@ cargo test
 
 ## 🧾 Versiyon
 
-**Current version:** v0.3.0
+v0.4.0
 
 ---
 
 ## 📝 Not
 
-Bu araç yalnızca header varlığını kontrol eder ve basit risk yorumları üretir. Header içeriklerinin doğruluğu veya tam güvenlik analizi yapılmamaktadır.
-
----
-
-## 🎯 Amaç
-
-Bu proje, temel web güvenliği prensiplerini anlamak ve Rust ile CLI tabanlı bir analiz aracı geliştirmek amacıyla hazırlanmıştır.
+Bu araç temel header analizi yapar. Gelişmiş güvenlik testleri içermez.

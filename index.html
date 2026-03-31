@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Security Scanner</title>
+
+  <style>
+    body {
+      font-family: Arial;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 20px;
+    }
+
+    h1 { color: #38bdf8; }
+
+    input {
+      padding: 10px;
+      width: 300px;
+      border-radius: 6px;
+      border: none;
+    }
+
+    button {
+      padding: 10px 15px;
+      margin-left: 10px;
+      background: #38bdf8;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      margin-top: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .grade-A { color: #22c55e; }
+    .grade-B { color: #84cc16; }
+    .grade-C { color: #facc15; }
+    .grade-F { color: #ef4444; }
+
+    .details {
+      margin-top: 20px;
+      padding: 15px;
+      background: #1e293b;
+      border-radius: 8px;
+    }
+
+    .high { color: #ef4444; }
+    .medium { color: #facc15; }
+    .low { color: #22c55e; }
+  </style>
+</head>
+
+<body>
+
+<h1>HTTP Header Scanner</h1>
+
+<input id="url" placeholder="https://example.com">
+<button onclick="scan()">Scan</button>
+
+<h2>Reports</h2>
+<div id="list"></div>
+
+<div id="details" class="details"></div>
+
+<script>
+
+let reports = [];
+
+// # REPORTLARI ÇEK
+async function load() {
+  const res = await fetch('/reports');
+  reports = await res.json();
+
+  const list = document.getElementById('list');
+  list.innerHTML = "";
+
+  reports.forEach((r, index) => {
+    const div = document.createElement('div');
+
+    div.className = "card";
+    div.innerHTML = `
+      <b>${r.url}</b><br>
+      Grade: <span class="grade-${r.grade}">${r.grade}</span> 
+      (Score: ${r.score})
+    `;
+
+    div.onclick = () => showDetails(index);
+
+    list.appendChild(div);
+  });
+}
+
+// # DETAY GÖSTER
+function showDetails(index) {
+  const r = reports[index];
+
+  let html = `
+    <h3>${r.url}</h3>
+    <p>Grade: <b class="grade-${r.grade}">${r.grade}</b> (${r.score})</p>
+    <hr>
+  `;
+
+  r.headers.forEach(h => {
+    let sevClass = h.severity.toLowerCase();
+
+    html += `
+      <p>
+        ${h.present ? "✅" : "❌"} 
+        <b>${h.name}</b> 
+        <span class="${sevClass}">[${h.severity}]</span><br>
+        → ${h.risk}
+      </p>
+    `;
+  });
+
+  document.getElementById('details').innerHTML = html;
+}
+
+// # SCAN
+async function scan() {
+  const url = document.getElementById('url').value;
+
+  await fetch('/scan', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ url })
+  });
+
+  load();
+}
+
+// # INIT
+load();
+
+</script>
+
+</body>
+</html>

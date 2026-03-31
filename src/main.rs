@@ -3,11 +3,16 @@
 
 use clap::{Parser, Subcommand};
 use reqwest::Client;
-use serde::Serialize;
+use serde::{Serialize, Deserialize};
 use std::fs;
 use std::path::Path;
+use axum::{
+    routing::{get, post},
+    Json, Router
+};
+use axum::response::Html;
 
-// # CLI Tanımlama
+// # CLI
 #[derive(Parser)]
 #[command(name = "pentest")]
 struct Cli {
@@ -20,72 +25,77 @@ enum Commands {
     Headers {
         url: String,
         #[arg(long, default_value = "allow")]
-        json: String } }
+        json: String },
+    Web }
 
-// # Header Sonuç Yapısı
-#[derive(Serialize)]
+// # Structlar
+#[derive(Serialize, Deserialize, Clone)]
 struct headerResult {
     name: String,
     present: bool,
     severity: String,
     risk: String }
 
-// # Genel Rapor Yapısı
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Clone)]
 struct report {
     url: String,
     grade: String,
     score: i32,
     headers: Vec<headerResult> }
 
+// # MAIN
 #[tokio::main]
 async fn main() {
 
-    // # CLI Parse
     let cli = Cli::parse();
 
-    // # Komut Yakalama
     match cli.command {
+
         Commands::Headers { url, json } => {
 
             match analyzeHeaders(&url).await {
                 Ok(reportData) => {
 
-                    // # JSON Kaydetme (default açık)
                     if json != "deny" {
                         saveJson(&reportData) }
 
-                    // # Terminal Çıktı
                     printMarkdown(&reportData) }
 
                 Err(e) => {
-                    eprintln!("Error: {}", e) } } } } }
+                    eprintln!("Error: {}", e) } } }
 
-// # Header Analiz İşlemi
+        Commands::Web => {
+            startWebServer().await } } }
+
+// # ANALİZ
 async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>> {
 
+    // # URL normalize işlemi
+    let fixedUrl = if url.starts_with("http://") || url.starts_with("https://") {
+        url.to_string()
+    } else {
+        format!("https://{}", url)
+    };
+
     let client = Client::new();
-    let response = client.get(url).send().await?;
+    let response = client.get(&fixedUrl).send().await?;
     let headers = response.headers();
 
-    // # Header Bilgi Tanımları
     let headerInfo = vec![
-        ("strict-transport-security", "HIGH", "MITM saldırılarına açık olabilir"),
-        ("content-security-policy", "HIGH", "XSS saldırılarına açık olabilir"),
-        ("x-frame-options", "MEDIUM", "Clickjacking saldırılarına açık olabilir"),
-        ("x-content-type-options", "LOW", "MIME sniffing riski oluşabilir"),
-        ("referrer-policy", "LOW", "Referer bilgisi sızabilir"),
-        ("permissions-policy", "LOW", "Tarayıcı özellikleri kontrolsüz olabilir") ];
+        ("strict-transport-security", "HIGH", "MITM riski"),
+        ("content-security-policy", "HIGH", "XSS riski"),
+        ("x-frame-options", "MEDIUM", "Clickjacking riski"),
+        ("x-content-type-options", "LOW", "MIME riski"),
+        ("referrer-policy", "LOW", "Referer sızıntısı"),
+        ("permissions-policy", "LOW", "Browser kontrolsüz") ];
 
     let mut results = vec![];
     let mut score = 100;
 
-    // # Header Kontrol Döngüsü
     for (name, severity, risk) in headerInfo {
 
         let isPresent = headers.get(name).is_some();
 
-        // # Score düşürme
         if !isPresent {
             score -= match severity {
                 "HIGH" => 20,
@@ -96,12 +106,8 @@ async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>>
             name: name.to_string(),
             present: isPresent,
             severity: severity.to_string(),
-            risk: if isPresent {
-                "No immediate risk".to_string()
-            } else {
-                risk.to_string() } }) }
+            risk: if isPresent { "OK".to_string() } else { risk.to_string() } }) }
 
-    // # Grade Hesaplama
     let grade = match score {
         90..=100 => "A",
         75..=89 => "B",
@@ -109,64 +115,87 @@ async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>>
         _ => "F" };
 
     Ok(report {
-        url: url.to_string(),
+        url: fixedUrl,
         grade: grade.to_string(),
         score,
         headers: results }) }
 
-// # Markdown Çıktı
-fn printMarkdown(reportData: &report) {
+// # MARKDOWN
+fn printMarkdown(r: &report) {
 
-    println!("- ### Guvenlik Raporu ### -\n");
-    println!("- Hedef: {}", reportData.url);
-    println!("- Derece: {} (Skor: {})\n", reportData.grade, reportData.score);
+    println!("# Security Report\n");
+    println!("{} - {} ({})\n", r.url, r.grade, r.score);
 
-    for h in &reportData.headers {
+    for h in &r.headers {
 
         let status = if h.present { "✅" } else { "❌" };
 
-        println!(
-            "- {} {} [{}]\n  → {}\n",
-            status,
-            h.name,
-            h.severity,
-            h.risk ) } }
+        println!("- {} {} [{}] -> {}", status, h.name, h.severity, h.risk) } }
 
-// # JSON Kaydetme
-fn saveJson(reportData: &report) {
+// # JSON SAVE
+fn saveJson(r: &report) {
 
-    let dirPath = Path::new("assets/reports");
+    let dir = Path::new("assets/reports");
 
-    if !dirPath.exists() {
-        fs::create_dir_all(dirPath).unwrap() }
+    if !dir.exists() {
+        fs::create_dir_all(dir).unwrap() }
 
-    let cleanUrl = reportData
-        .url
-        .replace("https://", "")
-        .replace("http://", "")
-        .replace("/", "_");
+    let name = r.url.replace("https://", "").replace("http://", "");
+    let path = format!("assets/reports/{}.json", name);
 
-    let filePath = format!("assets/reports/{}.json", cleanUrl);
+    fs::write(path.clone(), serde_json::to_string_pretty(r).unwrap()).unwrap();
 
-    let jsonData = serde_json::to_string_pretty(reportData).unwrap();
+    println!("[+] Saved: {}", path) }
 
-    fs::write(&filePath, jsonData).unwrap();
+// ======================
+// 🌐 WEB SERVER
+// ======================
 
-    println!("\n[+] JSON report saved: {}", filePath) }
+// # SERVER
+async fn startWebServer() {
 
-// # Test
-#[cfg(test)]
-mod tests {
+    let app = Router::new()
+        .route("/", get(index)) 
+        .route("/reports", get(getReports))
+        .route("/scan", post(scan));
 
-    #[test]
-    fn testScoreSystem() {
+    println!("Server running: http://127.0.0.1:3000");
 
-        let score = 80;
+    axum::serve(
+        tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap(),
+        app).await.unwrap() }
 
-        let grade = match score {
-            90..=100 => "A",
-            75..=89 => "B",
-            50..=74 => "C",
-            _ => "F" };
+// # REPORT LIST
+async fn getReports() -> Json<Vec<report>> {
 
-        assert_eq!(grade, "B") } }
+    let mut list = vec![];
+
+    if let Ok(entries) = fs::read_dir("assets/reports") {
+
+        for entry in entries {
+
+            if let Ok(file) = fs::read_to_string(entry.unwrap().path()) {
+                if let Ok(r) = serde_json::from_str::<report>(&file) {
+                    list.push(r) } } } }
+
+    Json(list) }
+
+// # SCAN API
+#[derive(Deserialize)]
+struct ScanRequest { url: String }
+
+async fn scan(Json(req): Json<ScanRequest>) -> Json<report> {
+
+    let r = analyzeHeaders(&req.url).await.unwrap();
+    saveJson(&r);
+
+    Json(r) }
+
+// # INDEX SAYFASI
+async fn index() -> Html<String> {
+
+    let html = std::fs::read_to_string("index.html")
+        .unwrap_or("<h1>index.html bulunamadı</h1>".to_string());
+
+    Html(html)
+}
