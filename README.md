@@ -1,6 +1,6 @@
-# HTTP Header Analyzer
+# HTTP Header Analyzer (SecOps Engine)
 
-Web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir araçtır.
+Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir güvenlik analiz aracıdır.
 
 ---
 
@@ -9,14 +9,32 @@ Web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzeri
 - HTTP header analizi
 - Severity sistemi (HIGH / MEDIUM / LOW)
 - Risk açıklamaları
-- Header value analizi (HSTS, CSP, X-Frame, Referrer)
-- Skor ve grade hesaplama
-- JSON rapor çıktısı
+- Header value analizi:
+  - HSTS (max-age kontrolü)
+  - CSP (unsafe-inline kontrolü)
+  - X-Frame-Options doğrulama
+  - Referrer-Policy kontrolü
+- Skor ve grade hesaplama (A–F)
+- JSON rapor çıktısı (timestamp destekli)
 - Batch scan desteği (.txt ile çoklu hedef)
-- Renkli terminal çıktısı
+- Renkli CLI çıktısı
 - Web GUI (dashboard)
-- Grafik (risk dağılımı)
-- REST API desteği
+
+---
+
+## 🌐 Web GUI Özellikleri
+
+- Sidebar ile rapor yönetimi
+- Arama (URL + severity)
+- Grade filtreleme
+- Otomatik rapor seçimi
+- Detaylı analiz ekranı
+- Risk summary (HIGH / MEDIUM / LOW)
+- Grafik (Chart.js)
+- Critical issue gösterimi
+- Score bar (görsel skor)
+- Responsive tasarım (mobil uyumlu)
+- Sticky glass footer
 
 ---
 
@@ -25,19 +43,19 @@ Web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzeri
 ### CLI
 
 ```bash
-cargo run -- pentest headers https://example.com
+cargo run -- headers https://example.com
 ````
 
 ### Batch Scan
 
 ```bash
-cargo run -- pentest headers targets.txt
+cargo run -- headers targets.txt
 ```
 
 ### Web GUI
 
 ```bash
-cargo run -- pentest web
+cargo run -- web
 ```
 
 Tarayıcı:
@@ -45,63 +63,39 @@ Tarayıcı:
 
 ---
 
-## 🌐 Web GUI Özellikleri
-
-* Rapor listeleme
-* Arama (search)
-* Grade filtreleme
-* Detaylı analiz görüntüleme
-* Risk summary paneli
-* Grafik (HIGH / MEDIUM / LOW dağılımı)
-* Scan sırasında loading feedback
-
----
-
-## 📊 Sistem Nasıl Çalışır?
-
-1. URL alınır
-2. HTTP isteği gönderilir
-3. Header'lar analiz edilir
-4. Severity ve risk belirlenir
-5. Skor hesaplanır
-6. Sonuçlar:
-
-   * Terminal
-   * JSON
-   * Web GUI
-
----
-
-## 🧮 Skorlama
-
-| Severity | Puan |
-| -------- | ---- |
-| HIGH     | -20  |
-| MEDIUM   | -10  |
-| LOW      | -5   |
-
----
-
-## 📁 JSON Raporlar
-
-assets/reports/
-
----
-
 ## 🧪 Test
 
 ```bash
-cargo test -p pentester
+cargo test
+```
+
+---
+
+## ⚠️ Error Handling
+
+* Geçersiz URL kontrolü
+* Timeout yönetimi
+* Web GUI hata mesajları
+* Backend Result<T> kullanımı
+
+---
+
+## 📁 Çıktılar
+
+JSON raporlar:
+
+```
+assets/reports/
 ```
 
 ---
 
 ## 🧾 Versiyon
 
-v0.4.6
+v0.5.0
 
 ---
 
-## 📝 Not
+## 📌 Not
 
-Bu araç temel HTTP header analizi yapar, ileri seviye pentest içermez.
+Bu araç temel HTTP header güvenlik analizleri yapar. Gelişmiş penetration test işlemlerini kapsamaz.

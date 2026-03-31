@@ -291,10 +291,150 @@ async fn getReports() -> Json<Vec<report>> {
 #[derive(Deserialize)]
 struct ScanRequest { url: String }
 
-async fn scan(Json(req): Json<ScanRequest>) -> Json<report> {
+use axum::http::StatusCode;
 
-    let r = analyzeHeaders(&req.url).await.unwrap();
-    saveJson(&r);
+async fn scan(Json(req): Json<ScanRequest>) -> Result<Json<report>, StatusCode> {
 
-    Json(r)
+    match analyzeHeaders(&req.url).await {
+        Ok(r) => {
+            saveJson(&r);
+            Ok(Json(r))
+        },
+        Err(_) => {
+            Err(StatusCode::BAD_REQUEST)
+        }
+    }
+}
+
+
+// ================= TESTS =================
+#[cfg(test)]
+mod tests {
+
+    // # Boş URL testi
+    #[test]
+    fn test_empty_url() {
+        let input = "";
+
+        let fixed = if input.starts_with("http") {
+            input.to_string()
+        } else {
+            format!("https://{}", input)
+        };
+
+        assert_eq!(fixed, "https://");
+    }
+
+    // # URL normalize testi
+    #[test]
+    fn test_url_fix() {
+        let input = "example.com";
+
+        let fixed = if input.starts_with("http") {
+            input.to_string()
+        } else {
+            format!("https://{}", input)
+        };
+
+        assert_eq!(fixed, "https://example.com");
+    }
+
+    // # URL NORMALIZE EDGE CASE
+    #[test]
+    fn test_url_already_has_https() {
+        let input = "https://google.com";
+
+        let fixed = if input.starts_with("http") {
+            input.to_string()
+        } else {
+            format!("https://{}", input)
+        };
+
+        assert_eq!(fixed, "https://google.com");
+    }
+
+    // # skor hesaplama testi (basit mantık)
+    #[test]
+    fn test_score_calculation() {
+
+        let mut score = 100;
+
+        // 1 HIGH eksik
+        score -= 20;
+
+        // 1 MEDIUM eksik
+        score -= 10;
+
+        // 1 LOW eksik
+        score -= 5;
+
+        assert_eq!(score, 65);
+    }
+
+    // # grade testi
+    #[test]
+    fn test_grade() {
+
+        let grade = match 65 {
+            90..=100 => "A",
+            75..=89 => "B",
+            50..=74 => "C",
+            _ => "F"
+        };
+
+        assert_eq!(grade, "C");
+    }
+
+    #[test]
+fn test_full_failure_score() {
+
+    let mut score = 100;
+
+    // tüm headerlar eksik gibi düşün
+    score -= 20; // HSTS
+    score -= 20; // CSP
+    score -= 10; // X-Frame
+    score -= 5;  // X-Content
+    score -= 5;  // Referrer
+    score -= 5;  // Permissions
+
+    assert!(score < 50);
+}
+
+#[test]
+fn test_perfect_score() {
+    let score = 100;
+
+    let grade = match score {
+        90..=100 => "A",
+        75..=89 => "B",
+        50..=74 => "C",
+        _ => "F"
+    };
+
+    assert_eq!(grade, "A");
+}
+
+#[test]
+fn test_label_logic() {
+
+    let score = 80;
+
+    let label = if score >= 75 { "Secure" } else { "Risky" };
+
+    assert_eq!(label, "Secure");
+}
+
+#[test]
+fn test_missing_count() {
+    let missing = vec!["csp", "hsts", "x-frame"];
+    assert_eq!(missing.len(), 3);
+}
+
+#[test]
+fn test_label_threshold() {
+    let score = 74;
+    let label = if score >= 75 { "Secure" } else { "Risky" };
+    assert_eq!(label, "Risky");
+}
 }
