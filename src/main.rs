@@ -7,6 +7,7 @@ use serde::{Serialize, Deserialize};
 use std::{fs, path::Path, time::Duration};
 use axum::{routing::{get, post}, Json, Router, response::Html};
 use colored::*;
+use chrono::Local;
 
 // # CLI
 #[derive(Parser)]
@@ -68,7 +69,7 @@ async fn main() {
     }
 }
 
-// # Tekli scan wrapper
+// # Tekli scan
 async fn runSingle(url: String, json: String) {
 
     match analyzeHeaders(&url).await {
@@ -90,14 +91,12 @@ async fn runSingle(url: String, json: String) {
 // # ANALİZ
 async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>> {
 
-    // # URL FIX
     let fixedUrl = if url.starts_with("http") {
         url.to_string()
     } else {
         format!("https://{}", url)
     };
 
-    // # CLIENT (timeout)
     let client = Client::builder()
         .timeout(Duration::from_secs(5))
         .build()?;
@@ -121,15 +120,44 @@ async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>>
     for (name, severity, risk) in headerInfo {
 
         let isPresent = headers.get(name).is_some();
-
         let mut finalRisk = risk.to_string();
 
-        // # VALUE ANALİZİ
+        // # HSTS
         if name == "strict-transport-security" && isPresent {
             if let Some(val) = headers.get(name) {
                 let v = val.to_str().unwrap_or("");
                 if !v.contains("max-age=31536000") {
                     finalRisk = "HSTS zayıf (low max-age)".to_string();
+                }
+            }
+        }
+
+        // # CSP
+        if name == "content-security-policy" && isPresent {
+            if let Some(val) = headers.get(name) {
+                let v = val.to_str().unwrap_or("");
+                if v.contains("unsafe-inline") {
+                    finalRisk = "CSP zayıf (unsafe-inline)".to_string();
+                }
+            }
+        }
+
+        // # X-FRAME
+        if name == "x-frame-options" && isPresent {
+            if let Some(val) = headers.get(name) {
+                let v = val.to_str().unwrap_or("");
+                if v != "DENY" && v != "SAMEORIGIN" {
+                    finalRisk = "X-Frame zayıf".to_string();
+                }
+            }
+        }
+
+        // # REFERRER
+        if name == "referrer-policy" && isPresent {
+            if let Some(val) = headers.get(name) {
+                let v = val.to_str().unwrap_or("");
+                if !v.contains("no-referrer") {
+                    finalRisk = "Referrer policy zayıf".to_string();
                 }
             }
         }
@@ -158,7 +186,6 @@ async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>>
         _ => "F"
     };
 
-    // # TOP ISSUES
     println!("\nTop Issues:");
     for (sev, name) in issues.iter().take(3) {
         println!("- [{}] {}", sev, name);
@@ -172,7 +199,7 @@ async fn analyzeHeaders(url: &str) -> Result<report, Box<dyn std::error::Error>>
     })
 }
 
-// # MARKDOWN (RENKLİ)
+// # MARKDOWN
 fn printMarkdown(r: &report) {
 
     println!("\n# Security Report\n");
@@ -185,11 +212,7 @@ fn printMarkdown(r: &report) {
 
     for h in &r.headers {
 
-        let status = if h.present {
-            "✔".green()
-        } else {
-            "✘".red()
-        };
+        let status = if h.present { "✔".green() } else { "✘".red() };
 
         println!(
             "- {} {} [{}] -> {}",
@@ -201,7 +224,7 @@ fn printMarkdown(r: &report) {
     }
 }
 
-// # JSON
+// # JSON SAVE (timestamp)
 fn saveJson(r: &report) {
 
     let dir = Path::new("assets/reports");
@@ -211,7 +234,9 @@ fn saveJson(r: &report) {
     }
 
     let name = r.url.replace("https://", "").replace("http://", "");
-    let path = format!("assets/reports/{}.json", name);
+    let timestamp = Local::now().format("%Y-%m-%d_%H-%M-%S");
+
+    let path = format!("assets/reports/{}_{}.json", name, timestamp);
 
     fs::write(path.clone(), serde_json::to_string_pretty(r).unwrap()).unwrap();
 
@@ -246,7 +271,6 @@ async fn getReports() -> Json<Vec<report>> {
     let mut list = vec![];
 
     if let Ok(entries) = fs::read_dir("assets/reports") {
-
         for entry in entries {
             if let Ok(data) = fs::read_to_string(entry.unwrap().path()) {
                 if let Ok(r) = serde_json::from_str::<report>(&data) {
