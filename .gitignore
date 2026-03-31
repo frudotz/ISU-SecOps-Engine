@@ -2,3 +2,4 @@ assets/reports/
 target/
 Cargo.lock
 .env
+.txt
