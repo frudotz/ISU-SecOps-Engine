@@ -1,0 +1,75 @@
+name: SecOps CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+
+  # =============================
+  # UBUNTU
+  # =============================
+  ubuntu:
+    name: Ubuntu Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Test
+        run: cargo test --all
+
+  # =============================
+  # WINDOWS
+  # =============================
+  windows:
+    name: Windows Build & Test
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Test
+        run: cargo test --all
+
+  # =============================
+  # KALI (DOCKER CONTAINER)
+  # =============================
+  kali:
+    name: Kali Linux (Container)
+    runs-on: ubuntu-latest
+
+    container:
+      image: kalilinux/kali-rolling
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Dependencies
+        run: |
+          apt update
+          apt install -y curl build-essential pkg-config libssl-dev ca-certificates
+
+      - name: Install Rust
+        run: |
+          curl https://sh.rustup.rs -sSf | sh -s -- -y
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Build
+        run: cargo build --verbose
+
+      - name: Test
+        run: cargo test --all
