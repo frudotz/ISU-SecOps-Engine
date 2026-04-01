@@ -440,8 +440,12 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_real_request_basic() {
-        let res = reqwest::get("https://example.com").await;
-        assert!(res.is_ok());
+async fn test_real_request_basic() {
+    if std::env::var("CI").is_ok() {
+        return; // CI ortamında skip
     }
+
+    let res = reqwest::get("https://example.com").await;
+    assert!(res.is_ok());
+}
 }
