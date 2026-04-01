@@ -1,6 +1,8 @@
 # HTTP Header Analyzer (SecOps Engine)
 
-Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web GUI üzerinden kullanılabilen bir güvenlik analiz aracıdır.
+Modern web uygulamalarının güvenlik seviyesini hızlı ve anlaşılır şekilde analiz etmek için geliştirilmiş, CLI ve Web GUI destekli bir HTTP header analiz aracıdır.
+
+Bu proje, gerçek dünya kullanım senaryolarını hedefleyen, performanslı ve modüler bir SecOps çözümü olarak tasarlanmıştır.
 
 ![Rust](https://img.shields.io/badge/Rust-000000?logo=rust&logoColor=white)
 ![CLI](https://img.shields.io/badge/Tool-CLI-blue)
@@ -13,35 +15,47 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web 
 
 ## 🚀 Özellikler
 
-- HTTP header analizi
-- Severity sistemi (HIGH / MEDIUM / LOW)
-- Risk açıklamaları
-- Header value analizi:
-  - HSTS (max-age kontrolü)
-  - CSP (unsafe-inline kontrolü)
-  - X-Frame-Options doğrulama
-  - Referrer-Policy kontrolü
-- Skor ve grade hesaplama (A–F)
-- JSON rapor çıktısı (timestamp destekli)
-- Batch scan desteği (.txt ile çoklu hedef)
-- Renkli CLI çıktısı
-- Web GUI (dashboard)
+* HTTP security header analizi
+* Severity sistemi (HIGH / MEDIUM / LOW)
+* Risk açıklamaları ve güvenlik yorumları
+* Header value analizi:
+
+  * HSTS (max-age kontrolü)
+  * CSP (unsafe-inline kontrolü)
+  * X-Frame-Options doğrulama
+  * Referrer-Policy kontrolü
+* Skor ve grade hesaplama (A–F)
+* JSON rapor çıktısı (timestamp destekli)
+* Batch scan desteği (.txt ile çoklu hedef)
+* Renkli CLI çıktısı
+* Web GUI (dashboard)
 
 ---
 
-## 🌐 Web GUI Özellikleri
+## 🌐 Web GUI
 
-- Sidebar ile rapor yönetimi
-- Arama (URL + severity)
-- Grade filtreleme
-- Otomatik rapor seçimi
-- Detaylı analiz ekranı
-- Risk summary (HIGH / MEDIUM / LOW)
-- Grafik (Chart.js)
-- Critical issue gösterimi
-- Score bar (görsel skor)
-- Responsive tasarım (mobil uyumlu)
-- Sticky glass footer
+Kullanıcı dostu dashboard ile analiz sonuçlarını görselleştirir:
+
+* Sidebar ile rapor yönetimi
+* Arama (URL bazlı)
+* Otomatik rapor seçimi
+* Detaylı header analizi
+* Risk dağılım grafiği (Chart.js)
+* Critical issue gösterimi
+* Görsel skor barı
+* Responsive tasarım (mobil uyumlu)
+
+---
+
+## 🧠 Mimari Yaklaşım
+
+Proje 3 ana katmandan oluşur:
+
+* **CLI Layer** → kullanıcı etkileşimi ve batch işlemler
+* **Analyzer Engine** → HTTP istekleri ve güvenlik analizi
+* **Web Layer (Axum)** → REST API + GUI entegrasyonu
+
+Bu yapı sayesinde sistem modüler, genişletilebilir ve sürdürülebilir hale getirilmiştir.
 
 ---
 
@@ -51,7 +65,7 @@ Bu proje, web sitelerinin HTTP güvenlik headerlarını analiz eden, CLI ve Web 
 
 ```bash
 cargo run -- headers https://example.com
-````
+```
 
 ### Batch Scan
 
@@ -66,15 +80,31 @@ cargo run -- web
 ```
 
 Tarayıcı:
-[http://127.0.0.1:3000](http://127.0.0.1:3000)
+http://127.0.0.1:3000
 
 ---
 
-## 🧪 Test
+## 🧪 Testing
 
 ```bash
 cargo test
 ```
+
+Ek olarak proje, gerçek dünya senaryolarını simüle eden async testler içerir.
+
+---
+
+## 🔒 Code Quality & Dev Workflow
+
+* `cargo fmt` ile standart formatlama
+* `cargo clippy` (strict mode) ile lint kontrolü
+* Multi-platform CI pipeline (Ubuntu, Windows, Kali)
+* `Justfile` ile standart geliştirme komutları:
+
+  * `just build`
+  * `just test`
+  * `just lint`
+  * `just ci`
 
 ---
 
@@ -82,8 +112,8 @@ cargo test
 
 * Geçersiz URL kontrolü
 * Timeout yönetimi
-* Web GUI hata mesajları
-* Backend Result<T> kullanımı
+* Backend tarafında `Result<T>` kullanımı
+* Web GUI kullanıcı geri bildirimleri
 
 ---
 
@@ -103,6 +133,14 @@ assets/reports/
 
 ---
 
+## ⚠️ Limitations
+
+* Sadece HTTP header analizi yapar
+* Aktif exploitation veya penetration test içermez
+* Hedef sistem erişilebilir olmalıdır
+
+---
+
 ## 🧾 Versiyon
 
 v0.5.0
@@ -111,4 +149,4 @@ v0.5.0
 
 ## 📌 Not
 
-Bu araç temel HTTP header güvenlik analizleri yapar. Gelişmiş penetration test işlemlerini kapsamaz.
+Bu proje, SecOps ve güvenlik analiz araçlarının temel prensiplerini göstermek amacıyla geliştirilmiştir. Gerçek sistemlerde daha kapsamlı güvenlik testleri önerilir.
