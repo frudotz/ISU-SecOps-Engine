@@ -13,6 +13,37 @@ Bu proje, gerçek dünya kullanım senaryolarını hedefleyen, performanslı ve 
 
 ---
 
+![ISU](https://www.istinye.edu.tr/sites/default/files/2025-07/isu_logo_tr-1.svg)
+
+Bölüm: Bilişim Güvenliği Teknolojisi  
+Ders: Sızma Testi  
+Öğretim Gör. (Danışman): Keyvan Arasteh Abbasabad  
+
+Öğr. Adı Soyadı: Hamza Arda Karabacak  
+Öğr. No.: 2520191010
+
+---
+
+## 📚 İçindekiler
+
+- [🚀 Özellikler](#-özellikler)
+- [🌐 Web GUI](#-web-gui)
+- [🧠 Mimari Yaklaşım](#-mimari-yaklaşım)
+- [⚙️ Kullanım](#️-kullanım)
+  - [CLI](#cli)
+  - [Batch Scan](#batch-scan)
+  - [Web GUI](#web-gui)
+- [🧪 Testing](#-testing)
+- [🔒 Code Quality & Dev Workflow](#-code-quality--dev-workflow)
+- [⚠️ Error Handling](#️-error-handling)
+- [📁 Çıktılar](#-çıktılar)
+- [📸 Dashboard Preview](#-dashboard-preview)
+- [⚠️ Limitations](#️-limitations)
+- [🧾 Versiyon](#-versiyon)
+- [📌 Not](#-not)
+
+---
+
 ## 🚀 Özellikler
 
 * HTTP security header analizi
