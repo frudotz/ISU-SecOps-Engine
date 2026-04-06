@@ -10,6 +10,7 @@ Bu proje, gerçek dünya kullanım senaryolarını hedefleyen, performanslı ve 
 ![Security](https://img.shields.io/badge/Security-Analyzer-red)
 ![Status](https://img.shields.io/badge/Status-Stable-brightgreen)
 ![CI](https://github.com/frudotz/ISU-SecOps-Engine/actions/workflows/ci.yml/badge.svg)
+![Docker](https://img.shields.io/badge/Docker-Supported-2496ED?logo=docker&logoColor=white)
 
 ---
 
