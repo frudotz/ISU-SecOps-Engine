@@ -130,7 +130,6 @@ docker run --rm pentester headers --json allow example.com
 ```bash
 docker run -d -p 8080:8080 --name pentester-web pentester web
 ```
-*(Web arayüzü başlatıldıktan sonra `http://localhost:8080` adresinden erişebilirsiniz.)*
 
 ---
 

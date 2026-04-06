@@ -3,4 +3,6 @@ assets/demo/
 target/
 Cargo.lock
 .env
+.env.*
+!.env.example
 test.txt

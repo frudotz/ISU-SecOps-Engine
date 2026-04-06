@@ -34,11 +34,11 @@ COPY --from=builder /usr/src/app/assets /app/assets
 # Since the app code specifically binds to 127.0.0.1:3000, we forward it to 0.0.0.0:8080
 # allowing external access to the container when the web server is running.
 RUN echo '#!/bin/sh\n\
-if [ "$1" = "web" ]; then\n\
+    if [ "$1" = "web" ]; then\n\
     echo "[!] Web mode detected. Starting socat to forward 0.0.0.0:8080 to internal 127.0.0.1:3000"\n\
     socat TCP-LISTEN:8080,fork,bind=0.0.0.0 TCP:127.0.0.1:3000 &\n\
-fi\n\
-exec /app/pentester "$@"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
+    fi\n\
+    exec /app/pentester "$@"' > /app/entrypoint.sh && chmod +x /app/entrypoint.sh
 
 # Expose the proxied port for the Web UI
 EXPOSE 8080
