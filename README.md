@@ -177,9 +177,15 @@ assets/reports/
 
 ---
 
-## 📸 Dashboard Preview
+## 🎬 Demo
 
-![Dashboard](assets/demo/dashboard.png)
+### Web Arayüzü (Web GUI)
+
+<img src="assets/demo/web-demo.webp" width="800" alt="Web GUI Demo Video">
+
+### Uçbirim Arayüzü (CLI/Terminal)
+
+<img src="assets/demo/project-demo.webp" width="800" alt="CLI/Terminal Demo Video">
 
 ---
 
@@ -193,7 +199,7 @@ assets/reports/
 
 ## 🧾 Versiyon
 
-v0.5.0
+v0.5.2
 
 ---
 
