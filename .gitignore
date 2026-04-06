@@ -1,4 +1,5 @@
 assets/reports/
+assets/demo/
 target/
 Cargo.lock
 .env

@@ -1,0 +1,11 @@
+target/
+**/.git/
+**/.github/
+**/.gitignore
+Dockerfile
+.dockerignore
+docs/
+README.md
+SECURITY.md
+*.md
+Cargo.lock

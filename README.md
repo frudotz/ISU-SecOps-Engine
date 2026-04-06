@@ -31,6 +31,7 @@ Bu proje, gerçek dünya kullanım senaryolarını hedefleyen, performanslı ve 
   - [CLI](#cli)
   - [Batch Scan](#batch-scan)
   - [Web GUI](#web-gui)
+  - [Docker](#docker)
 - [🧪 Testing](#-testing)
 - [🔒 Code Quality & Dev Workflow](#-code-quality--dev-workflow)
 - [⚠️ Error Handling](#️-error-handling)
@@ -111,6 +112,25 @@ cargo run -- web
 Tarayıcı:
 http://127.0.0.1:3000
 
+### Docker
+
+Projeyi sisteminize Rust kurmadan doğrudan Docker üzerinden çalıştırabilirsiniz:
+
+**İmajı Derlemek İçin:**
+```bash
+docker build -t pentester .
+```
+
+**CLI aracı olarak çalıştırmak için:**
+```bash
+docker run --rm pentester headers --json allow example.com
+```
+
+**Web arayüzünü (GUI) başlatmak için:**
+```bash
+docker run -d -p 8080:8080 --name pentester-web pentester web
+```
+
 ---
 
 ## 🧪 Testing
@@ -156,9 +176,15 @@ assets/reports/
 
 ---
 
-## 📸 Dashboard Preview
+## 🎬 Demo
 
-![Dashboard](assets/demo/dashboard.png)
+### Web Arayüzü (Web GUI)
+
+<img src="assets/demo/web-demo.webp" width="800" alt="Web GUI Demo Video">
+
+### Uçbirim Arayüzü (CLI/Terminal)
+
+<img src="assets/demo/project-demo.webp" width="800" alt="CLI/Terminal Demo Video">
 
 ---
 
@@ -172,7 +198,7 @@ assets/reports/
 
 ## 🧾 Versiyon
 
-v0.5.0
+v0.5.2
 
 ---
 
