@@ -13,6 +13,36 @@ Bu proje, gerçek dünya kullanım senaryolarını hedefleyen, performanslı ve 
 
 ---
 
+| ![ISU](https://www.istinye.edu.tr/sites/default/files/2025-07/isu_logo_tr-1.svg) | Sızma Testi Proje Ödevi |
+|---|---|
+| **Öğrenci Adı** | Hamza Arda Karabacak |
+| **Öğrenci No.** | 2520191010 |
+| **Öğretim Gör. (Danışman)** | Keyvan Arasteh Abbasabad |
+| **Ders Kodu & Adı** | BGT006 Sızma Testi |
+
+---
+
+## 📚 İçindekiler
+
+- [🚀 Özellikler](#-özellikler)
+- [🌐 Web GUI](#-web-gui)
+- [🧠 Mimari Yaklaşım](#-mimari-yaklaşım)
+- [⚙️ Kullanım](#️-kullanım)
+  - [CLI](#cli)
+  - [Batch Scan](#batch-scan)
+  - [Web GUI](#web-gui)
+  - [Docker](#docker)
+- [🧪 Testing](#-testing)
+- [🔒 Code Quality & Dev Workflow](#-code-quality--dev-workflow)
+- [⚠️ Error Handling](#️-error-handling)
+- [📁 Çıktılar](#-çıktılar)
+- [📸 Dashboard Preview](#-dashboard-preview)
+- [⚠️ Limitations](#️-limitations)
+- [🧾 Versiyon](#-versiyon)
+- [📌 Not](#-not)
+
+---
+
 ## 🚀 Özellikler
 
 * HTTP security header analizi
@@ -81,6 +111,26 @@ cargo run -- web
 
 Tarayıcı:
 http://127.0.0.1:3000
+
+### Docker
+
+Projeyi sisteminize Rust kurmadan doğrudan Docker üzerinden çalıştırabilirsiniz:
+
+**İmajı Derlemek İçin:**
+```bash
+docker build -t pentester .
+```
+
+**CLI aracı olarak çalıştırmak için:**
+```bash
+docker run --rm pentester headers --json allow example.com
+```
+
+**Web arayüzünü (GUI) başlatmak için:**
+```bash
+docker run -d -p 8080:8080 --name pentester-web pentester web
+```
+*(Web arayüzü başlatıldıktan sonra `http://localhost:8080` adresinden erişebilirsiniz.)*
 
 ---
 
