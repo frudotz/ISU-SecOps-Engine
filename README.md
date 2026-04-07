@@ -179,6 +179,8 @@ assets/reports/
 
 ## 🎬 Demo
 
+> *Windows ve Kali Linux detaylı test videosu için: [`/assets/demo/full-demo.mp4`](https://github.com/frudotz/ISU-SecOps-Engine/raw/refs/heads/main/assets/demo/full-demo.mp4)*  
+
 ### Web Arayüzü (Web GUI)
 
 <img src="assets/demo/web-demo.webp" width="800" alt="Web GUI Demo Video">
